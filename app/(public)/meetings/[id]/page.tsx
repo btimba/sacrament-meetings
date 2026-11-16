@@ -1,8 +1,11 @@
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import MeetingDetail from '@/components/MeetingDetail';
+import { MeetingSearch } from '@/components/MeetingSearch';
+import Pagination from '@/components/Pagination';
 import { getMeetingById } from '@/lib/meetings-db';
 import { Suspense } from 'react';
+import { getMeetingCount } from '@/lib/meetings-db';
 import type { ReactElement } from 'react';
 
 interface MeetingPageProps {
@@ -25,13 +28,22 @@ async function MeetingContent({
   await connection();
   const { id } = await params;
   const meetingId = Number(id);
-
+  
   if (!/^[1-9]\d*$/.test(id) || !Number.isSafeInteger(meetingId)) {
     notFound();
   }
 
-  const meeting = getMeetingById(meetingId);
+  const [meeting] = await Promise.all([
+    getMeetingById(meetingId),
+    getMeetingCount() 
+  ]);
   if (!meeting) notFound();
 
-  return <MeetingDetail meeting={meeting} />;
+  return (
+    <section className="mx-auto max-w-3xl space-y-6">
+      <MeetingSearch />
+      <MeetingDetail meeting={meeting} />
+      <Pagination />
+    </section>
+  );
 }

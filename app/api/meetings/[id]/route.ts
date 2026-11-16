@@ -18,7 +18,7 @@ export async function GET(
     return Response.json(error, { status: 400 });
   }
 
-  const meeting: SacramentMeeting | null = getMeetingById(parsedId);
+  const meeting: SacramentMeeting | null = await getMeetingById(parsedId);
   if (!meeting) {
     const error: ApiError = { error: 'Meeting not found.' };
     return Response.json(error, { status: 404 });
